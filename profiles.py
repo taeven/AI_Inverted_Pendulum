@@ -1,22 +1,5 @@
-class Trapaz:
-    def __init__(self, t1, t2, t3, t4):
-        self.t1 = t1
-        self.t2 = t2
-        self.t4 = t4
-        self.t3 = t3
-
-
-class Profile:
-    def set_zero(self, t1, t2, t4):
-        t3 = t2
-        self.zero = Trapaz(t1, t2, t3, t4)
-
-    def set_small(self, t1, t2, t3, t4):
-        self.pos_small = Trapaz(t1, t2, t3, t4)
-        self.neg_small = Trapaz(-t4, -t3, -t2, -t1)
-
-    def set_medium(self, t1, t2, t3, t4):
-        self.medium = Trapaz(t1, t2, t3, t4)
+import structures
+from parameters import Setup
 
 
 def fuzzy(t, profile):
@@ -37,27 +20,72 @@ def area_trapaz(h, trapaz):
 
 def get_i_profile(prof_angle, prof_velocity, angle, velocity):
     combin = []
-    # row1
-    combin.append((2, min(fuzzy(angle, prof_angle.neg_small),
-                          fuzzy(velocity, prof_velocity.neg_small))))
-    combin.append((1, min(fuzzy(angle, prof_angle.zero),
-                          fuzzy(velocity, prof_velocity.neg_small))))
-    combin.append((0, min(fuzzy(angle, prof_angle.pos_small),
-                          fuzzy(velocity, prof_velocity.neg_small))))
-    # row2
-    combin.append((1, min(fuzzy(angle, prof_angle.neg_small),
-                          fuzzy(velocity, prof_velocity.zero))))
-    combin.append((0, min(fuzzy(angle, prof_angle.zero),
-                          fuzzy(velocity, prof_velocity.zero))))
-    combin.append((-1, min(fuzzy(angle, prof_angle.pos_small),
-                           fuzzy(velocity, prof_velocity.zero))))
-    # row3
-    combin.append((0, min(fuzzy(angle, prof_angle.neg_small),
-                          fuzzy(velocity, prof_velocity.pos_small))))
-    combin.append((-1, min(fuzzy(angle, prof_angle.zero),
-                           fuzzy(velocity, prof_velocity.pos_small))))
-    combin.append((0, min(fuzzy(angle, prof_angle.pos_small),
-                          fuzzy(velocity, prof_velocity.pos_small))))
+
+    fuz_angle = []
+    fuz_angle.append(fuzzy(angle, prof_angle.neg_small))
+    fuz_angle.append(fuzzy(angle, prof_angle.zero))
+    fuz_angle.append(fuzzy(angle, prof_angle.pos_small))
+
+    fuz_velocity = []
+    fuz_velocity.append(fuzzy(velocity, prof_velocity.neg_small))
+    fuz_velocity.append(fuzzy(velocity, prof_velocity.zero))
+    fuz_velocity.append(fuzzy(velocity, prof_velocity.pos_small))
+
+    print(angle, velocity)
+    print(fuz_angle)
+    print(fuz_velocity)
+    
+
+    for i in range(3):  # velocity
+        for j in range(3):  # angle
+            k = 0
+            if i == 0 and j == 0:
+                k = 2
+
+            if (i == 0 and j == 1) or (i == 1 and j == 0):
+                k = 1
+
+            if (i == 0 and j == 2) or (i == 1 and j == 1) or (i == 2 and j == 0):
+                k = 0
+
+            if (i == 1 and j == 2) or (i == 2 and j == 1):
+                k = -1
+
+            if i == 2 and j == 2:
+                k = -2
+
+            # if fuz_angle[j] == 0 or fuz_velocity[i] == 0:
+            #     combin.append((k, fuz_velocity[i]+fuz_angle[j]))
+            # else:
+            combin.append((k, min(fuz_velocity[i], fuz_angle[j])))
+    # for i in range(3):
+    print(combin)
+    print("----------------------")
+    #     for j in range(3):
+    #         print(fuz_angle[i])
+
+    #             # row1
+
+    # combin.append((2, min(fuzzy(angle, prof_angle.neg_small),
+    #                       fuzzy(velocity, prof_velocity.neg_small))))
+    # combin.append((1, min(fuzzy(angle, prof_angle.zero),
+    #                       fuzzy(velocity, prof_velocity.neg_small))))
+    # combin.append((0, min(fuzzy(angle, prof_angle.pos_small),
+    #                       fuzzy(velocity, prof_velocity.neg_small))))
+    # # row2
+    # combin.append((1, min(fuzzy(angle, prof_angle.neg_small),
+    #                       fuzzy(velocity, prof_velocity.zero))))
+    # combin.append((0, min(fuzzy(angle, prof_angle.zero),
+    #                       fuzzy(velocity, prof_velocity.zero))))
+    # combin.append((-1, min(fuzzy(angle, prof_angle.pos_small),
+    #                        fuzzy(velocity, prof_velocity.zero))))
+    # # row3
+    # combin.append((0, min(fuzzy(angle, prof_angle.neg_small),
+    #                       fuzzy(velocity, prof_velocity.pos_small))))
+    # combin.append((-1, min(fuzzy(angle, prof_angle.zero),
+    #                        fuzzy(velocity, prof_velocity.pos_small))))
+    # combin.append((0, min(fuzzy(angle, prof_angle.pos_small),
+    #                       fuzzy(velocity, prof_velocity.pos_small))))
 
     return combin
 
@@ -66,8 +94,9 @@ def defuzzy(prof_i, prof_angle, prof_velocity, angle, velocity):
     combin = get_i_profile(prof_angle, prof_velocity, angle, velocity)
     total_area = 0
     multiply = 0
+    # print(combin)
     for (a, b) in combin:
-        print(a, " ", b, "-", angle, velocity)
+        # print(a, " ", b, "-", angle, velocity)
         area = 0
         centroid_x = 0
         if abs(a) == 0:
@@ -85,11 +114,15 @@ def defuzzy(prof_i, prof_angle, prof_velocity, angle, velocity):
             centroid_x = centroid_x*(a/abs(a))
         total_area = total_area + area
         multiply = multiply + area*centroid_x
-    print(multiply, " ", total_area)
+    # print(multiply, " ", total_area)
     if multiply == 0:
         return 0
     ans = multiply/total_area
     return ans
+
+
+# setup = Setup()
+# defuzzy(setup.current, setup.angle, setup.velocity, 15, 0)
 
 
 # i = 0

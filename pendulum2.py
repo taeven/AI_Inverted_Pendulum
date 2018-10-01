@@ -3,6 +3,7 @@ import math
 import parameters as parameter
 import profiles as pf
 
+
 class Bob:
     def __init__(self, x, y, r):
         self.x = x
@@ -12,6 +13,7 @@ class Bob:
         self.thickness = 1
 
     def display(self, screen):
+        # print(self.x, " ", self.y)
         pygame.draw.circle(screen, self.colour, (self.x, self.y), self.r)
 
 
@@ -32,22 +34,21 @@ class Line:
 background_colour = (255, 255, 255)
 (width, height) = (800, 800)
 screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption('Tutorial 1')
+pygame.display.set_caption('Inverted Pendulum')
 screen.fill(background_colour)
 x = 300
 y = 150
-#start angle
-thita = 15
-#velocity 
+# start angle
+thita = -25
+# velocity
 omega = 0
-#accel
+# accel
 alpha = 0
-#params
+# params
 params = parameter.Setup()
 
 
 particle = Bob(x, y, 30)
-
 
 
 basex = 300
@@ -58,21 +59,31 @@ pygame.display.flip()
 running = True
 
 i = 0
-t= 1
+t = 1
+
+g = 10
+
+
+def g_factor(thita):
+    return g * (math.sin(math.radians(thita))**2)
+
 
 while running:
     screen.fill((255, 255, 255))
 
     thita = thita+omega*t
-    omega = omega + alpha*t
-    alpha = pf.defuzzy(params.current, params.angle,params.velocity,thita,omega)
-
+    omega = omega + alpha*t + g_factor(thita)
+    alpha = pf.defuzzy(params.current, params.angle,
+                       params.velocity, thita, omega)
+    # print(thita, omega, alpha)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    x = line.length * math.sin(math.radians(thita+180))+basex
-    y = line.length * math.cos(math.radians(thita+180))+basey
+    x = line.length * math.sin(math.radians(thita))+basex
+    y = basey - line.length * math.cos(math.radians(thita))
+
+    # print(x, " ", y)
 
     line.x = round(x)
     line.y = round(y)
