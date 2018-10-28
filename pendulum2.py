@@ -38,14 +38,15 @@ pygame.display.set_caption('Inverted Pendulum')
 screen.fill(background_colour)
 x = 300
 y = 150
-# start angle
-thita = -25
-# velocity
-omega = 0
-# accel
-alpha = 0
+
 # params
 params = parameter.Setup()
+# start angle
+thita = params.start_angle
+# velocity
+omega = params.start_velocity
+# accel
+alpha = params.start_alpha
 
 
 particle = Bob(x, y, 30)
@@ -58,23 +59,21 @@ line = Line(basex, basey, x, y)
 pygame.display.flip()
 running = True
 
-i = 0
-t = 1
+t = params.dt
 
-g = 10
 
 
 def g_factor(thita):
-    return g * (math.sin(math.radians(thita))**2)
+    return params.g_value * (math.sin(math.radians(thita)))
 
 
 while running:
     screen.fill((255, 255, 255))
 
     thita = thita+omega*t
-    omega = omega + alpha*t + g_factor(thita)
+    omega = omega + alpha*t + g_factor(thita)*t
     alpha = pf.defuzzy(params.current, params.angle,
-                       params.velocity, thita, omega)
+                       params.velocity, thita, omega)/(params.I* params.k)
     # print(thita, omega, alpha)
 
     for event in pygame.event.get():
